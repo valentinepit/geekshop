@@ -16,20 +16,21 @@
             контакты
         </a>
     </li>
-    <li>
-        {% if user.is_authenticated %}
-            <li><a href="{% url 'auth:edit' %}">{{ user.first_name|default:"Пользователь" }}</a></li>
-            <li><a href="{% url 'auth:logout' %}">выйти</a></li>
-        {% else %}
-            <li><a href="{% url 'auth:register' %}">Регистрация</a></li>
-            <li><a href="{% url 'auth:login' %}">войти</a></li>
-        {% endif %}
-    </li>
+    {% if user.is_superuser %}
+        <li><a href="{% url 'adminapp:user_list' %}">Админка</a></li>
+    {% endif %}
+    {% if user.is_authenticated %}
+        <li><a href="{% url 'auth:edit' %}">{{ user.first_name|default:"Пользователь" }}</a></li>
+        <li><a href="{% url 'auth:logout' %}">выйти</a></li>
+    {% else %}
+        <li><a href="{% url 'auth:register' %}">Регистрация</a></li>
+        <li><a href="{% url 'auth:login' %}">войти</a></li>
+    {% endif %}
 </ul>
 <a href="#" class="search"></a>
 <a href="{% url 'basket:basket' %}" class="basket">
     {% if basket %}
         {{ basket.0.total_cost|floatformat:0 }} руб<br>
-        {{ basket.0.total_quantity}} шт
+        {{ basket.0.total_quantity }} шт
     {% endif %}
 </a>
