@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import user_passes_test
-from django.http import HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
@@ -9,7 +8,6 @@ from adminapp.forms import ShopUserAdminEditForm, ProductCategoryEditForm, Produ
 from authapp.forms import ShopUserRegisterForm
 from authapp.models import ShopUser
 from mainapp.models import ProductCategory, Product
-from mainapp.views import get_same_products
 
 
 class AccessMixin:
@@ -79,23 +77,6 @@ class CategoryDeleteView(AccessMixin, DeleteView):
 
     def get_success_url(self):
         return reverse('adminapp:category_list')
-
-
-# @user_passes_test(lambda u: u.is_superuser)
-# def category_delete(request, pk):
-#     current_category = get_object_or_404(ProductCategory, pk=pk)
-#
-#     if request.method == 'POST':
-#         if current_category.is_active:
-#             current_category.is_active = False
-#         else:
-#             current_category.is_active = True
-#         current_category.save()
-#         return HttpResponseRedirect(reverse('adminapp:category_list'))
-#     context = {
-#         'object': current_category
-#     }
-#     return render(request, 'adminapp/category_delete.html', context)
 
 
 class ProductCreateView(AccessMixin, CreateView):
