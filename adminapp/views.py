@@ -1,8 +1,7 @@
+from django.contrib.auth.decorators import user_passes_test
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
-
-from django.contrib.auth.decorators import user_passes_test
-from django.urls import reverse, reverse_lazy
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, DetailView
 
@@ -10,6 +9,7 @@ from adminapp.forms import ShopUserAdminEditForm, ProductCategoryEditForm, Produ
 from authapp.forms import ShopUserRegisterForm
 from authapp.models import ShopUser
 from mainapp.models import ProductCategory, Product
+from mainapp.views import get_same_products
 
 
 class AccessMixin:
@@ -26,24 +26,6 @@ class UserCreateView(AccessMixin, CreateView):
 
     def get_success_url(self):
         return reverse('adminapp:user_list')
-
-
-# @user_passes_test(lambda u: u.is_superuser)
-# def user_create(request):
-#     if request.method == 'POST':
-#         user_form = ShopUserRegisterForm(request.POST, request.FILES)
-#
-#         if user_form.is_valid():
-#             user_form.save()
-#             return HttpResponseRedirect(reverse('adminapp:user_list'))
-#
-#     else:
-#         user_form = ShopUserRegisterForm()
-#
-#     context = {
-#         'form': user_form
-#     }
-#     return render(request, 'adminapp/user_form.html', context)
 
 
 class UsersListView(AccessMixin, ListView):
@@ -65,70 +47,55 @@ class UserDelete(AccessMixin, DeleteView):
     template_name = 'adminapp/user_delete.html'
 
     def get_success_url(self):
-        # product_item = ShopUser.objects.get(pk=self.kwargs.get('pk'))
         return reverse('adminapp:user_list')
 
 
-@user_passes_test(lambda u: u.is_superuser)
-def category_create(request):
-    if request.method == 'POST':
-        category_form = ShopUserRegisterForm(request.POST, request.FILES)
+class CategoryCreate(AccessMixin, CreateView):
+    model = ProductCategory
+    template_name = 'adminapp/category_form.html'
+    form_class = ProductCategoryEditForm
 
-        if category_form.is_valid():
-            category_form.save()
-            return HttpResponseRedirect(reverse('adminapp:category_list'))
-
-    else:
-        category_form = ShopUserRegisterForm()
-
-    context = {
-        'form': category_form
-    }
-    return render(request, 'adminapp/user_form.html', context)
+    def get_success_url(self):
+        return reverse('adminapp:category_list')
 
 
-@user_passes_test(lambda u: u.is_superuser)
-def categories(request):
-    context = {
-        'object_list': ProductCategory.objects.all().order_by('-is_active')
-    }
-    return render(request, 'adminapp/categories.html', context)
+class CategoryListView(AccessMixin, ListView):
+    model = ProductCategory
+    template_name = "adminapp/categories.html"
 
 
-@user_passes_test(lambda u: u.is_superuser)
-def category_update(request, pk):
-    current_category = get_object_or_404(ProductCategory, pk=pk)
-    if request.method == 'POST':
-        category_form = ProductCategoryEditForm(request.POST, request.FILES, instance=current_category)
+class CategoryUpdateView(AccessMixin, UpdateView):
+    model = ProductCategory
+    template_name = "adminapp/category_form.html"
+    form_class = ProductCategoryEditForm
 
-        if category_form.is_valid():
-            category_form.save()
-            return HttpResponseRedirect(reverse('adminapp:category_list'))
-
-    else:
-        category_form = ProductCategoryEditForm(instance=current_category)
-
-    context = {
-        'form': category_form
-    }
-    return render(request, 'adminapp/category_form.html', context)
+    def get_success_url(self):
+        return reverse('adminapp:category_list')
 
 
-@user_passes_test(lambda u: u.is_superuser)
-def category_delete(request, pk):
-    current_category = get_object_or_404(ProductCategory, pk=pk)
+class CategoryDeleteView(AccessMixin, DeleteView):
+    model = ProductCategory
+    template_name = 'adminapp/category_delete.html'
 
-    if request.method == 'POST':
-        if current_category.is_active:
-            current_category.is_active = False
-        else:
-            current_category.is_active = True
-        current_category.save()
-        return HttpResponseRedirect(reverse('adminapp:category_list'))
-    context = {
-        'object': current_category
-    }
-    return render(request, 'adminapp/category_delete.html', context)
+    def get_success_url(self):
+        return reverse('adminapp:category_list')
+
+
+# @user_passes_test(lambda u: u.is_superuser)
+# def category_delete(request, pk):
+#     current_category = get_object_or_404(ProductCategory, pk=pk)
+#
+#     if request.method == 'POST':
+#         if current_category.is_active:
+#             current_category.is_active = False
+#         else:
+#             current_category.is_active = True
+#         current_category.save()
+#         return HttpResponseRedirect(reverse('adminapp:category_list'))
+#     context = {
+#         'object': current_category
+#     }
+#     return render(request, 'adminapp/category_delete.html', context)
 
 
 class ProductCreateView(AccessMixin, CreateView):
