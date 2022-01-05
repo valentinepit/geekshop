@@ -12,74 +12,61 @@ from authapp.models import ShopUser
 from mainapp.models import ProductCategory, Product
 
 
-@user_passes_test(lambda u: u.is_superuser)
-def user_create(request):
-    if request.method == 'POST':
-        user_form = ShopUserRegisterForm(request.POST, request.FILES)
-
-        if user_form.is_valid():
-            user_form.save()
-            return HttpResponseRedirect(reverse('adminapp:user_list'))
-
-    else:
-        user_form = ShopUserRegisterForm()
-
-    context = {
-        'form': user_form
-    }
-    return render(request, 'adminapp/user_form.html', context)
-
-
-# @user_passes_test(lambda u: u.is_superuser)
-# def users(request):
-#     context = {
-#         'object_list': ShopUser.objects.all().order_by('-is_active')
-#     }
-#     return render(request, 'adminapp/users.html', context)
-
-class UsersListView(ListView):
-    model = ShopUser
-    template_name = 'adminapp/users.html'
+class AccessMixin:
 
     @method_decorator(user_passes_test(lambda u: u.is_superuser))
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
 
 
-@user_passes_test(lambda u: u.is_superuser)
-def user_update(request, pk):
-    current_user = get_object_or_404(ShopUser, pk=pk)
-    if request.method == 'POST':
-        user_form = ShopUserAdminEditForm(request.POST, request.FILES, instance=current_user)
+class UserCreateView(AccessMixin, CreateView):
+    model = ShopUser
+    template_name = 'adminapp/user_form.html'
+    form_class = ShopUserRegisterForm
 
-        if user_form.is_valid():
-            user_form.save()
-            return HttpResponseRedirect(reverse('adminapp:user_list'))
-
-    else:
-        user_form = ShopUserAdminEditForm(instance=current_user)
-
-    context = {
-        'form': user_form
-    }
-    return render(request, 'adminapp/user_form.html', context)
+    def get_success_url(self):
+        return reverse('adminapp:user_list')
 
 
-@user_passes_test(lambda u: u.is_superuser)
-def user_delete(request, pk):
-    current_user = get_object_or_404(ShopUser, pk=pk)
+# @user_passes_test(lambda u: u.is_superuser)
+# def user_create(request):
+#     if request.method == 'POST':
+#         user_form = ShopUserRegisterForm(request.POST, request.FILES)
+#
+#         if user_form.is_valid():
+#             user_form.save()
+#             return HttpResponseRedirect(reverse('adminapp:user_list'))
+#
+#     else:
+#         user_form = ShopUserRegisterForm()
+#
+#     context = {
+#         'form': user_form
+#     }
+#     return render(request, 'adminapp/user_form.html', context)
 
-    if request.method == 'POST':
-        if current_user.is_active:
-            current_user.is_active = False
-        else:
-            current_user.is_active = True
-        current_user.save()
-        return HttpResponseRedirect(reverse('adminapp:user_list'))
-    context = {
-        'object': current_user
-    }
-    return render(request, 'adminapp/user_delete.html', context)
+
+class UsersListView(AccessMixin, ListView):
+    model = ShopUser
+    template_name = 'adminapp/users.html'
+
+
+class UserUpdateView(AccessMixin, UpdateView):
+    model = ShopUser
+    template_name = 'adminapp/user_form.html'
+    form_class = ShopUserAdminEditForm
+
+    def get_success_url(self):
+        return reverse('adminapp:user_list')
+
+
+class UserDelete(AccessMixin, DeleteView):
+    model = ShopUser
+    template_name = 'adminapp/user_delete.html'
+
+    def get_success_url(self):
+        # product_item = ShopUser.objects.get(pk=self.kwargs.get('pk'))
+        return reverse('adminapp:user_list')
 
 
 @user_passes_test(lambda u: u.is_superuser)
@@ -144,7 +131,7 @@ def category_delete(request, pk):
     return render(request, 'adminapp/category_delete.html', context)
 
 
-class ProductCreateView(CreateView):
+class ProductCreateView(AccessMixin, CreateView):
     model = Product
     template_name = 'adminapp/product_form.html'
     form_class = ProductEditForm
@@ -153,7 +140,7 @@ class ProductCreateView(CreateView):
         return reverse('adminapp:category_list', args=[self.kwargs.get('pk')])
 
 
-class ProductsListView(ListView):
+class ProductsListView(AccessMixin, ListView):
     model = Product
     template_name = 'adminapp/products.html'
 
@@ -166,7 +153,7 @@ class ProductsListView(ListView):
         return Product.objects.filter(category__pk=self.kwargs.get('pk'))
 
 
-class ProductUpdateView(UpdateView):
+class ProductUpdateView(AccessMixin, UpdateView):
     model = Product
     template_name = 'adminapp/product_form.html'
     form_class = ProductEditForm
@@ -176,7 +163,7 @@ class ProductUpdateView(UpdateView):
         return reverse('adminapp:product_list', args=[product_item.category_id])
 
 
-class ProductDeleteView(DeleteView):
+class ProductDeleteView(AccessMixin, DeleteView):
     model = Product
     template_name = 'adminapp/product_delete.html'
 
@@ -184,6 +171,7 @@ class ProductDeleteView(DeleteView):
         product_item = Product.objects.get(pk=self.kwargs.get('pk'))
         return reverse('adminapp:product_list', args=[product_item.category_id])
 
-class ProductDetail(DetailView):
+
+class ProductDetail(AccessMixin, DetailView):
     model = Product
     template_name = 'adminapp/product_detail.html'
