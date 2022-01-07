@@ -1,6 +1,10 @@
-from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UserChangeForm
-from django.contrib.auth.models import User
+import hashlib
+from datetime import datetime
+
+import pytz
 from django import forms
+from django.conf import settings
+from django.contrib.auth.forms import AuthenticationForm, UserCreationForm, UserChangeForm
 
 from authapp.models import ShopUser
 
@@ -33,6 +37,15 @@ class ShopUserRegisterForm(UserCreationForm):
         if data < 18:
             raise forms.ValidationError('Возраст должен быть больше 18 лет')
         return data
+
+    def save(self, *args, **kwargs):
+        user = super().save(*args, **kwargs)
+        user.is_active = False
+        user.activate_key = hashlib.sha1(user.email.encode('utf-8')).hexdigest()[:6]
+        user.activate_key_expired = datetime.now(pytz.timezone(settings.TIME_ZONE))
+        user.save()
+
+        return user
 
 
 class ShopUserEditForm(UserChangeForm):

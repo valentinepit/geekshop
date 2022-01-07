@@ -1,0 +1,11 @@
+Content-Type: text/plain; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+Subject: Account activation
+From: geekshop@gb.com
+To: test@test.com
+Date: Fri, 07 Jan 2022 19:12:05 -0000
+Message-ID: <164158272553.2668.17995987181192731703@DESKTOP-U0CCBAA>
+
+Your activation link is - http://localhost:8000//auth/verify/test@test.com/a6ad00/
+-------------------------------------------------------------------------------
