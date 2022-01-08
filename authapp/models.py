@@ -16,10 +16,16 @@ class ShopUser(AbstractUser):
         if datetime.now(pytz.timezone(settings.TIME_ZONE)) > self.activate_key_expired + timedelta(hours=48):
             return True
         return False
-    #
-    # def delete(self, *args, **kwargs):
-    #     if self.is_active:
-    #         self.is_active = False
-    #     else:
-    #         self.is_active = True
-    #     self.save()
+
+    def delete(self, *args, **kwargs):
+        if self.is_active:
+            self.is_active = False
+        else:
+            self.is_active = True
+        self.save()
+
+    def activate_user(self):
+        self.is_active = True
+        self.activate_key = None
+        self.activate_key_expired = None
+        self.save()
