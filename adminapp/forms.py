@@ -1,4 +1,3 @@
-from django.db.models import Model
 from django.forms import ModelForm
 
 from authapp.forms import ShopUserEditForm
@@ -35,5 +34,3 @@ class ProductEditForm(ModelForm):
         for field_name, field in self.fields.items():
             field.widget.attrs['class'] = 'form-control'
             field.help_text = ''
-
-
