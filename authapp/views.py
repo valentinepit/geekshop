@@ -3,7 +3,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from authapp.forms import ShopUserLoginForm, ShopUserRegisterForm, ShopUserEditForm
+from authapp.forms import ShopUserLoginForm, ShopUserRegisterForm, ShopUserEditForm, ShopUserProfileEditForm
 from authapp.models import ShopUser
 from authapp.services import send_verify_email
 
@@ -59,13 +59,18 @@ def edit(request):
 
     if request.method == 'POST':
         edit_form = ShopUserEditForm(request.POST, request.FILES, instance=request.user)
-        if edit_form.is_valid():
+        edit_profile_form = ShopUserProfileEditForm(request.POST, instance=request.user.shopuserprofile)
+        if edit_form.is_valid() and edit_profile_form.is_valid():
             edit_form.save()
             return HttpResponseRedirect(reverse('auth:edit'))
     else:
         edit_form = ShopUserEditForm(instance=request.user)
-
-    content = {'title': title, 'edit_form': edit_form}
+        edit_profile_form = ShopUserProfileEditForm(instance=request.user.shopuserprofile)
+    content = {
+        'title': title,
+        'edit_form': edit_form,
+        'edit_profile_form': edit_profile_form
+    }
 
     return render(request, 'authapp/edit.html', content)
 

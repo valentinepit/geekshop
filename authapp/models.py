@@ -45,9 +45,9 @@ class ShopUserProfile(models.Model):
     )
 
     user = models.OneToOneField(ShopUser, null=False, unique=True, on_delete=CASCADE, db_index=True)
-    tagline = models.CharField(max_length=128, verbose_name='tags', blank=True)
-    about_me = models.TextField(verbose_name='About Me')
-    gender = models.CharField(max_length=1, choices=GENDER, default=MALE, verbose_name='Gender')
+    tagline = models.CharField(max_length=128, verbose_name='Тэги', blank=True)
+    about_me = models.TextField(verbose_name='Обо мне')
+    gender = models.CharField(max_length=1, choices=GENDER, default=MALE, verbose_name='Пол')
 
     @receiver(post_save, sender=ShopUser)
     def create_user_profile(sender, instance, created, **kwargs):
